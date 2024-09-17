@@ -1,0 +1,15 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "always",
+        "source.organizeImports": "always"
+    },
+    "cSpell.words": [
+        "atleast",
+        "firstname",
+        "lastname",
+        "signin",
+        "Swiper",
+        "uuidv"
+    ]
+}
