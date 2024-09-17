@@ -6,6 +6,7 @@ import { client } from "@/lib/prisma"
 // import { revalidatePath } from "next/cache"
 import { v4 as uuidv4 } from "uuid"
 import { z } from "zod"
+import { onAuthenticatedUser } from "./auth"
 // import { z } from "zod"
 
 export const onGetAffiliateInfo = async (id: string) => {
@@ -113,152 +114,155 @@ export const onCreateNewGroup = async (
     }
 }
 
-// export const onGetGroupInfo = async (groupid: string) => {
-//   try {
-//     const user = await onAuthenticatedUser()
-//     const group = await client.group.findUnique({
-//       where: {
-//         id: groupid,
-//       },
-//     })
+export const onGetGroupInfo = async (groupid: string) => {
+    try {
+        const user = await onAuthenticatedUser()
+        const group = await client.group.findUnique({
+            where: {
+                id: groupid,
+            },
+        })
 
-//     if (group)
-//       return {
-//         status: 200,
-//         group,
-//         groupOwner: user.id === group.userId ? true : false,
-//       }
+        if (group)
+            return {
+                status: 200,
+                group,
+                groupOwner: user.id === group.userId ? true : false,
+            }
 
-//     return { status: 404 }
-//   } catch (error) {
-//     return { status: 400 }
-//   }
-// }
+        return { status: 404 }
+    } catch (error) {
+        return { status: 400 }
+    }
+}
 
-// export const onGetUserGroups = async (id: string) => {
-//   try {
-//     const groups = await client.user.findUnique({
-//       where: {
-//         id,
-//       },
-//       select: {
-//         group: {
-//           select: {
-//             id: true,
-//             name: true,
-//             icon: true,
-//             channel: {
-//               where: {
-//                 name: "general",
-//               },
-//               select: {
-//                 id: true,
-//               },
-//             },
-//           },
-//         },
-//         membership: {
-//           select: {
-//             Group: {
-//               select: {
-//                 id: true,
-//                 icon: true,
-//                 name: true,
-//                 channel: {
-//                   where: {
-//                     name: "general",
-//                   },
-//                   select: {
-//                     id: true,
-//                   },
-//                 },
-//               },
-//             },
-//           },
-//         },
-//       },
-//     })
+export const onGetUserGroups = async (id: string) => {
+    try {
+        const groups = await client.user.findUnique({
+            where: {
+                id,
+            },
+            select: {
+                group: {
+                    select: {
+                        id: true,
+                        name: true,
+                        icon: true,
+                        channel: {
+                            where: {
+                                name: "general",
+                            },
+                            select: {
+                                id: true,
+                            },
+                        },
+                    },
+                },
+                membership: {
+                    select: {
+                        Group: {
+                            select: {
+                                id: true,
+                                icon: true,
+                                name: true,
+                                channel: {
+                                    where: {
+                                        name: "general",
+                                    },
+                                    select: {
+                                        id: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
 
-//     if (groups && (groups.group.length > 0 || groups.membership.length > 0)) {
-//       return {
-//         status: 200,
-//         groups: groups.group,
-//         members: groups.membership,
-//       }
-//     }
+        if (
+            groups &&
+            (groups.group.length > 0 || groups.membership.length > 0)
+        ) {
+            return {
+                status: 200,
+                groups: groups.group,
+                members: groups.membership,
+            }
+        }
 
-//     return {
-//       status: 404,
-//     }
-//   } catch (error) {
-//     return { status: 400 }
-//   }
-// }
+        return {
+            status: 404,
+        }
+    } catch (error) {
+        return { status: 400 }
+    }
+}
 
-// export const onGetGroupChannels = async (groupid: string) => {
-//   try {
-//     const channels = await client.channel.findMany({
-//       where: {
-//         groupId: groupid,
-//       },
-//       orderBy: {
-//         createdAt: "asc",
-//       },
-//     })
+export const onGetGroupChannels = async (groupid: string) => {
+    try {
+        const channels = await client.channel.findMany({
+            where: {
+                groupId: groupid,
+            },
+            orderBy: {
+                createdAt: "asc",
+            },
+        })
 
-//     return { status: 200, channels }
-//   } catch (error) {
-//     return { status: 400, message: "Oops! something went wrong" }
-//   }
-// }
+        return { status: 200, channels }
+    } catch (error) {
+        return { status: 400, message: "Oops! something went wrong" }
+    }
+}
 
-// export const onGetGroupSubscriptions = async (groupid: string) => {
-//   try {
-//     const subscriptions = await client.subscription.findMany({
-//       where: {
-//         groupId: groupid,
-//       },
-//       orderBy: {
-//         createdAt: "desc",
-//       },
-//     })
+export const onGetGroupSubscriptions = async (groupid: string) => {
+    try {
+        const subscriptions = await client.subscription.findMany({
+            where: {
+                groupId: groupid,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        })
 
-//     const count = await client.members.count({
-//       where: {
-//         groupId: groupid,
-//       },
-//     })
+        const count = await client.members.count({
+            where: {
+                groupId: groupid,
+            },
+        })
 
-//     if (subscriptions) {
-//       return { status: 200, subscriptions, count }
-//     }
-//   } catch (error) {
-//     return { status: 400 }
-//   }
-// }
+        if (subscriptions) {
+            return { status: 200, subscriptions, count }
+        }
+    } catch (error) {
+        return { status: 400 }
+    }
+}
 
-// export const onGetAllGroupMembers = async (groupid: string) => {
-//   try {
-//     const user = await onAuthenticatedUser()
-//     const members = await client.members.findMany({
-//       where: {
-//         groupId: groupid,
-//         NOT: {
-//           userId: user.id,
-//         },
-//       },
-//       include: {
-//         User: true,
-//       },
-//     })
+export const onGetAllGroupMembers = async (groupid: string) => {
+    try {
+        const user = await onAuthenticatedUser()
+        const members = await client.members.findMany({
+            where: {
+                groupId: groupid,
+                NOT: {
+                    userId: user.id,
+                },
+            },
+            include: {
+                User: true,
+            },
+        })
 
-//     if (members && members.length > 0) {
-//       return { status: 200, members }
-//     }
-//   } catch (error) {
-//     return { status: 400, message: "Oops something went wrong" }
-//   }
-// }
+        if (members && members.length > 0) {
+            return { status: 200, members }
+        }
+    } catch (error) {
+        return { status: 400, message: "Oops something went wrong" }
+    }
+}
 
 // export const onSearchGroups = async (
 //   mode: "GROUPS" | "POSTS",
